@@ -1,12 +1,33 @@
 #import <React/RCTViewComponentView.h>
 #import <UIKit/UIKit.h>
+#import <WebRTC/WebRTC.h> // Import Google WebRTC
 
 #ifndef UnifiedWebrtcViewNativeComponent_h
 #define UnifiedWebrtcViewNativeComponent_h
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface UnifiedWebrtcView : RCTViewComponentView
+// Forward declare RTCMediaStream for the property
+@class RTCMediaStream;
+
+@interface UnifiedWebrtcView : RCTViewComponentView <RTCPeerConnectionDelegate, RTCVideoViewDelegate>
+
+@property (nonatomic, strong) RTCPeerConnectionFactory *peerConnectionFactory;
+@property (nonatomic, strong, nullable) RTCPeerConnection *peerConnection;
+@property (nonatomic, strong) RTCEAGLVideoView *videoView; // For rendering video
+@property (nonatomic, strong, nullable) RTCVideoTrack *remoteVideoTrack;
+// @property (nonatomic, strong, nullable) RTCVideoTrack *localVideoTrack; // If local preview is needed
+
+// Method to initiate stream playback (will involve SDP exchange)
+- (void)playStream:(NSString *)streamUrlOrSignalingInfo; // Placeholder for actual signaling
+- (void)dispose;
+
+// Methods for SDP and ICE candidate handling (called from JS via commands)
+- (void)createOffer; // If this view can initiate calls
+- (void)createAnswer; // If this view receives calls
+- (void)setRemoteDescriptionWithSdp:(NSString *)sdp type:(NSString *)type;
+- (void)addIceCandidateWithSdp:(NSString *)sdp sdpMLineIndex:(int)sdpMLineIndex sdpMid:(NSString *)sdpMid;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -1,2 +1,30 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.unifiedwebrtc">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Required for WebRTC audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Required for WebRTC video (even if only receiving, SDK might check) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Optional, but often useful with WebRTC -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- FOREGROUND_SERVICE might be needed if doing background calls, but for simple view, maybe not. -->
+    <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> -->
+
+
+    <!-- Declare features. For a viewer, camera/mic might not be strictly required by the app's logic,
+         but the WebRTC library might still expect them to be declarable. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <application>
+        <!-- No specific activity needs to be declared for google-webrtc library itself -->
+    </application>
 </manifest>

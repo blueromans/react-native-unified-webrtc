@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "rootDir": ".",
     "paths": {
       "react-native-unified-webrtc": ["./src/index"]
@@ -11,7 +12,7 @@
     "jsx": "react-jsx",
     "lib": ["ESNext"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
@@ -24,6 +25,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "verbatimModuleSyntax": true
+    // "verbatimModuleSyntax": true // Removed for testing
+    "types": ["react", "react-native", "jest"]
   }
 }

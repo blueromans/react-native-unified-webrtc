@@ -1,0 +1,32 @@
+{
+  "extends": "../tsconfig.json", // Extend the root tsconfig
+  "compilerOptions": {
+    "baseUrl": ".", // Base URL for this sub-project
+    "paths": {
+      "react-native-unified-webrtc": ["../src/index"], // Point to the library's source
+      // It's often good to ensure react and react-native resolve from the root
+      // or are correctly picked up by the "types" array from the extended config.
+      // If issues persist, you might need explicit paths for them too, e.g.:
+      // "react": ["../node_modules/react"],
+      // "react-native": ["../node_modules/react-native"]
+    },
+    "composite": true, // Useful for project references if you build the example separately
+    "noEmit": true,    // Example app usually doesn't emit types itself for publishing
+    "jsx": "react-jsx" // Ensure JSX is configured
+  },
+  "include": [
+    "src/**/*",         // Include all source files in the example app
+    "index.js",         // Include the entry point
+    "../src/**/*"       // Also include the library's source for type checking
+    // Add other files/patterns if necessary
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "android",
+    "ios"
+    // Exclude other build artifacts or config files not meant for TS compilation
+  ]
+}

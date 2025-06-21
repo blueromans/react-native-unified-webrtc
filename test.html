@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WebRTC Viewer with TURN</title>
+</head>
+<body>
+  <h1>WebRTC Stream</h1>
+  
+  <!-- Input for URL -->
+  <label for="whep-url">Enter WHEP URL:</label>
+  <input type="text" id="whep-url" size="60" placeholder="https://live.spacture.ai:8443/2/amish_554_cam_02/whep" />
+  <button id="connect-btn">Connect</button>
+  
+  <br/><br/>
+  <video id="video" autoplay playsinline controls></video>
+
+  <script>
+    const video = document.getElementById('video');
+    const urlInput = document.getElementById('whep-url');
+    const connectBtn = document.getElementById('connect-btn');
+    
+    let pc = null; // PeerConnection will be created on connect
+    
+    connectBtn.addEventListener('click', () => {
+      const url = urlInput.value.trim();
+      if (!url) {
+        alert('Please enter a valid WHEP URL');
+        return;
+      }
+
+      if (pc) {
+        // If there is an existing connection, close it before creating a new one
+        pc.close();
+        pc = null;
+      }
+
+      pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          {
+            urls: 'turn:52.0.202.78:3478',
+            username: 'dummy-password',
+            credential: 'dummy'
+          }
+        ]
+      });
+
+      pc.addTransceiver('video', { direction: 'recvonly' });
+
+      pc.addEventListener('track', event => {
+        console.log('Got remote track');
+        video.srcObject = event.streams[0];
+      });
+
+      pc.addEventListener('icegatheringstatechange', () => {
+        console.log('ICE gathering state:', pc.iceGatheringState);
+        if (pc.iceGatheringState === 'complete') {
+          sendOffer();
+        }
+      });
+
+      console.log('Creating offer...');
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => {
+          console.log('Local description set. Waiting for ICE gathering to complete...');
+          setTimeout(() => {
+            if (pc.iceGatheringState !== 'complete') {
+              console.warn('ICE gathering timeout. Forcing send...');
+              sendOffer();
+            }
+          }, 2000);
+        })
+        .catch(console.error);
+
+      function sendOffer() {
+        if (pc._offerSent) return;
+        pc._offerSent = true;
+
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/sdp' },
+          body: pc.localDescription.sdp
+        })
+          .then(response => response.text())
+          .then(answerSDP => pc.setRemoteDescription({ type: 'answer', sdp: answerSDP }))
+          .then(() => console.log('Remote description set. WebRTC connection established.'))
+          .catch(console.error);
+      }
+    });
+  </script>
+</body>
+</html>
