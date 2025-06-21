@@ -17,7 +17,7 @@ export default function App(): React.JSX.Element {
   const webrtcRef = useRef<UnifiedWebrtcViewRef>(null);
   const [_isConnected, _setIsConnected] = useState(false);
   const [streamUrl, setStreamUrl] = useState(
-    'https://live.spacture.ai:8443/248/holiday-farms-1-park-plaza_9090_cam_02/whep'
+    'https://live.spacture.ai:8443/2/002104/whep'
   );
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected' | 'error' | 'disconnecting'
