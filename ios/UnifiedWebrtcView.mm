@@ -7,8 +7,16 @@
 
 #import "RCTFabricComponentsPlugins.h"
 
-// Import Google WebRTC using module import syntax
-@import WebRTC;
+// Import Jitsi WebRTC framework
+#import <JitsiWebRTC/RTCPeerConnectionFactory.h>
+#import <JitsiWebRTC/RTCDefaultVideoDecoderFactory.h>
+#import <JitsiWebRTC/RTCSoftwareVideoDecoderFactory.h>
+#import <JitsiWebRTC/RTCDefaultVideoEncoderFactory.h>
+#import <JitsiWebRTC/RTCConfiguration.h>
+#import <JitsiWebRTC/RTCIceServer.h>
+#import <JitsiWebRTC/RTCMediaConstraints.h>
+#import <JitsiWebRTC/RTCVideoRenderer.h>
+#import <JitsiWebRTC/RTCEAGLVideoView.h>
 #import <AVFoundation/AVFoundation.h>
 
 using namespace facebook::react;
@@ -21,7 +29,7 @@ using namespace facebook::react;
 @property (nonatomic, strong) NSString *pendingStreamUrl;
 @property (nonatomic, strong) RTCSessionDescription *localOffer;
 @property (nonatomic, strong) NSString *lastEmittedConnectionState;
-@property (nonatomic, strong) NSMutableSet<NSString *> *addedVideoTracks;
+@property (nonatomic, strong) NSMutableSet<NSString *> *addedVideoTrackIds;
 
 @end
 
@@ -45,7 +53,7 @@ using namespace facebook::react;
     // Initialize state variables
     self.iceGatheringComplete = NO;
     self.whepOfferSent = NO;
-    self.addedVideoTracks = [[NSMutableSet alloc] init];
+    self.addedVideoTrackIds = [[NSMutableSet alloc] init];
     
     // Create conditional video decoder factory with H.265 support
     RTCVideoDecoderFactory *decoderFactory = [self createVideoDecoderFactory];
@@ -188,10 +196,6 @@ using namespace facebook::react;
     // For a viewer, set up transceivers to receive media
     [_peerConnection addTransceiverOfType:RTCRtpMediaTypeVideo init:[RTCRtpTransceiverInit new]];
     [_peerConnection addTransceiverOfType:RTCRtpMediaTypeAudio init:[RTCRtpTransceiverInit new]];
-}
-
-- (void)playStream:(NSString *)streamUrlOrSignalingInfo {
-    [self internalPlayStream:streamUrlOrSignalingInfo];
 }
 
 - (void)internalPlayStream:(NSString *)streamUrlOrSignalingInfo {
@@ -497,8 +501,8 @@ using namespace facebook::react;
     if ([track.kind isEqualToString:kRTCMediaStreamTrackKindVideo]) {
         NSString *trackId = [NSString stringWithFormat:@"%@_%@", mediaStreams.firstObject.streamId, track.trackId];
         
-        if (![self.addedVideoTracks containsObject:trackId]) {
-            [self.addedVideoTracks addObject:trackId];
+        if (![self.addedVideoTrackIds containsObject:trackId]) {
+            [self.addedVideoTrackIds addObject:trackId];
             
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 NSLog(@"[UnifiedWebrtcView] Adding video track to renderer: %@", trackId);
@@ -525,71 +529,86 @@ using namespace facebook::react;
     [self internalPlayStream:streamUrlOrSignalingInfo];
 }
 
-- (void)internalPlayStream:(NSString *)streamUrlOrSignalingInfo {
-    NSLog(@"[UnifiedWebrtcView] Starting stream connection to: %@", streamUrlOrSignalingInfo);
-    
-    // Reset state
-    self.iceGatheringComplete = NO;
-    self.whepOfferSent = NO;
-    self.pendingStreamUrl = streamUrlOrSignalingInfo;
-    
-    // Cancel any existing timer
-    [self.iceGatheringTimer invalidate];
-    
-    // Check if this is a direct WHEP URL
-    if ([streamUrlOrSignalingInfo containsString:@"/whep"]) {
-        NSLog(@"[UnifiedWebrtcView] === DIRECT WHEP URL DETECTED ===");
-        self.pendingStreamUrl = streamUrlOrSignalingInfo;
-        
-        if (!_peerConnection) {
-            [self createPeerConnection];
-        }
-        
-        // Create offer and wait for ICE gathering completion
-        [_peerConnection offerForConstraints:[self defaultMediaConstraints] completionHandler:^(RTCSessionDescription * _Nullable offer, NSError * _Nullable error) {
-            if (error) {
-                NSLog(@"[UnifiedWebrtcView] Error creating offer: %@", error.localizedDescription);
-                return;
-            }
-            
-            if (offer) {
-                NSLog(@"[UnifiedWebrtcView] Local offer created, setting as local description...");
-                [self->_peerConnection setLocalDescription:offer completionHandler:^(NSError * _Nullable error) {
-                    if (error) {
-                        NSLog(@"[UnifiedWebrtcView] Error setting local description: %@", error.localizedDescription);
-                    } else {
-                        NSLog(@"[UnifiedWebrtcView] Local description set. Waiting for ICE gathering...");
-                        self.localOffer = offer;
-                    }
-                }];
-            }
-        }];
-    }
-}
-
 - (void)createOffer {
     NSLog(@"[UnifiedWebrtcView] Command: createOffer called");
-    [self createOffer];
+    if (!_peerConnection) [self createPeerConnection];
+    [_peerConnection offerForConstraints:[self defaultMediaConstraints] completionHandler:^(RTCSessionDescription * _Nullable sdp, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"[UnifiedWebrtcView] Error creating offer: %@", error.localizedDescription);
+            return;
+        }
+        [self->_peerConnection setLocalDescription:sdp completionHandler:^(NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"[UnifiedWebrtcView] Error setting local description: %@", error.localizedDescription);
+            } else {
+                NSLog(@"[UnifiedWebrtcView] Offer created and set as local description: %@", sdp.sdp);
+                // This would be an event to JS: onLocalSdp(sdp.sdp, sdp.typeString)
+            }
+        }];
+    }];
 }
 
 - (void)createAnswer {
     NSLog(@"[UnifiedWebrtcView] Command: createAnswer called");
-    [self createAnswer];
+    if (!_peerConnection) [self createPeerConnection];
+    [_peerConnection answerForConstraints:[self defaultMediaConstraints] completionHandler:^(RTCSessionDescription * _Nullable sdp, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"[UnifiedWebrtcView] Error creating answer: %@", error.localizedDescription);
+            return;
+        }
+        [self->_peerConnection setLocalDescription:sdp completionHandler:^(NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"[UnifiedWebrtcView] Error setting local description: %@", error.localizedDescription);
+            } else {
+                NSLog(@"[UnifiedWebrtcView] Answer created and set as local description: %@", sdp.sdp);
+                // This would be an event to JS: onLocalSdp(sdp.sdp, sdp.typeString)
+            }
+        }];
+    }];
 }
 
 - (void)setRemoteDescription:(NSString *)sdp type:(NSString *)type {
     NSLog(@"[UnifiedWebrtcView] Command: setRemoteDescription called with type: %@", type);
-    [self setRemoteDescriptionWithSdp:sdp type:type];
+    RTCSdpType sdpType = RTCSdpTypeOffer; // Default
+    if ([type isEqualToString:@"answer"]) {
+        sdpType = RTCSdpTypeAnswer;
+    }
+    
+    RTCSessionDescription *sessionDescription = [[RTCSessionDescription alloc] initWithType:sdpType sdp:sdp];
+    [_peerConnection setRemoteDescription:sessionDescription completionHandler:^(NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"[UnifiedWebrtcView] Error setting remote description: %@", error.localizedDescription);
+        } else {
+            NSLog(@"[UnifiedWebrtcView] Remote description set successfully");
+        }
+    }];
 }
 
-- (void)addIceCandidate:(NSString *)candidateSdp sdpMLineIndex:(double)sdpMLineIndex sdpMid:(NSString *)sdpMid {
+- (void)addIceCandidate:(NSString *)candidateSdp sdpMLineIndex:(NSNumber *)sdpMLineIndex sdpMid:(NSString *)sdpMid {
     NSLog(@"[UnifiedWebrtcView] Command: addIceCandidate called");
-    [self addIceCandidateWithSdp:candidateSdp sdpMLineIndex:(int)sdpMLineIndex sdpMid:sdpMid];
+    RTCIceCandidate *candidate = [[RTCIceCandidate alloc] initWithSdp:candidateSdp sdpMLineIndex:(int)sdpMLineIndex.intValue sdpMid:sdpMid];
+    [_peerConnection addIceCandidate:candidate];
 }
 
 - (void)dispose {
     NSLog(@"[UnifiedWebrtcView] Command: dispose called");
-    [self dispose];
+    [self.iceGatheringTimer invalidate];
+    self.iceGatheringTimer = nil;
+    
+    if (_peerConnection) {
+        [_peerConnection close];
+        _peerConnection = nil;
+    }
+    
+    _peerConnectionFactory = nil;
+    self.pendingStreamUrl = nil;
+    self.localOffer = nil;
+    
+    // Remove all video tracks from renderer
+    for (NSString *trackId in self.addedVideoTrackIds) {
+        NSLog(@"[UnifiedWebrtcView] Removing video track: %@", trackId);
+    }
+    [self.addedVideoTrackIds removeAllObjects];
 }
 
 #pragma mark - RCTComponentViewProtocol

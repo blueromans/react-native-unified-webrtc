@@ -1,6 +1,14 @@
 #import <React/RCTViewComponentView.h>
 #import <UIKit/UIKit.h>
-#import <WebRTC/WebRTC.h> // Import Google WebRTC
+#import <JitsiWebRTC/RTCPeerConnectionFactory.h>
+#import <JitsiWebRTC/RTCPeerConnection.h>
+#import <JitsiWebRTC/RTCVideoTrack.h>
+#import <JitsiWebRTC/RTCVideoView.h>
+#import <JitsiWebRTC/RTCSessionDescription.h>
+#import <JitsiWebRTC/RTCIceCandidate.h>
+#import <JitsiWebRTC/RTCMediaStream.h>
+#import <JitsiWebRTC/RTCVideoViewDelegate.h>
+#import <JitsiWebRTC/RTCPeerConnectionDelegate.h>
 
 #ifndef UnifiedWebrtcViewNativeComponent_h
 #define UnifiedWebrtcViewNativeComponent_h
@@ -26,8 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
 // Methods for SDP and ICE candidate handling (called from JS via commands)
 - (void)createOffer; // If this view can initiate calls
 - (void)createAnswer; // If this view receives calls
-- (void)setRemoteDescriptionWithSdp:(NSString *)sdp type:(NSString *)type;
-- (void)addIceCandidateWithSdp:(NSString *)sdp sdpMLineIndex:(int)sdpMLineIndex sdpMid:(NSString *)sdpMid;
+- (void)setRemoteDescription:(NSString *)sdp type:(NSString *)type;
+- (void)addIceCandidate:(NSString *)candidateSdp sdpMLineIndex:(NSNumber *)sdpMLineIndex sdpMid:(NSString *)sdpMid;
 
 // Conditional H.265 codec support methods
 - (RTCVideoDecoderFactory *)createVideoDecoderFactory;

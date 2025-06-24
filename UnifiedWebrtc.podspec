@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   # For example, if some .h files are implementation details.
   # s.private_header_files = "ios/Private/**/*.h" 
 
-  s.dependency "GoogleWebRTC" # Standard pod name for Google's WebRTC library
+  s.dependency "JitsiWebRTC", "~> 124.0" # Use Jitsi's WebRTC library to match Android
   s.dependency "React-Core"
   s.dependency "React-RCTFabric" # For Fabric components like RCTViewComponentView
   s.dependency "ReactCommon" # Often needed with Fabric
