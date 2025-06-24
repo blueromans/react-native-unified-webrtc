@@ -24,6 +24,11 @@ export type OnConnectionErrorEventData = Readonly<{
   streamUrl: string;
 }>;
 
+export type OnConnectionStateChangeEventData = Readonly<{
+  state: string;
+  streamUrl: string;
+}>;
+
 // Interface for props
 export interface NativeProps extends ViewProps {
   color?: string;
@@ -31,6 +36,7 @@ export interface NativeProps extends ViewProps {
   onLocalSdpReady?: DirectEventHandler<OnLocalSdpEventData>;
   onIceCandidateReady?: DirectEventHandler<OnIceCandidateReadyEventData>;
   onConnectionError?: DirectEventHandler<OnConnectionErrorEventData>;
+  onConnectionStateChange?: DirectEventHandler<OnConnectionStateChangeEventData>;
 }
 
 // Interface for commands

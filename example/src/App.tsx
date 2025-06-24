@@ -15,9 +15,9 @@ import {
 
 export default function App(): React.JSX.Element {
   const webrtcRef = useRef<UnifiedWebrtcViewRef>(null);
-  const [_isConnected, _setIsConnected] = useState(false);
   const [streamUrl, setStreamUrl] = useState(
-    'https://live.spacture.ai:8443/2/002104/whep'
+    'https://live.spacture.ai:8443/2/002104/whep' // H.264 codec (stable)
+    // 'https://live.spacture.ai:8443/247/247102/whep' // H.265 codec (testing conditional support)
   );
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected' | 'error' | 'disconnecting'
@@ -133,6 +133,30 @@ export default function App(): React.JSX.Element {
     setConnectionStatus('error');
   };
 
+  const handleConnectionStateChange = (event: {
+    nativeEvent: { state: string; streamUrl: string };
+  }) => {
+    const { state, streamUrl: eventStreamUrl } = event.nativeEvent;
+    addLog(`Connection state changed: ${state} for ${eventStreamUrl}`);
+
+    switch (state) {
+      case 'connected':
+        setConnectionStatus('connected');
+        break;
+      case 'disconnected':
+        setConnectionStatus('disconnected');
+        break;
+      case 'failed':
+        setConnectionStatus('error');
+        break;
+      case 'closed':
+        setConnectionStatus('disconnected');
+        break;
+      default:
+        break;
+    }
+  };
+
   const clearLogs = () => {
     setLogs([]);
   };
@@ -164,6 +188,7 @@ export default function App(): React.JSX.Element {
           onLocalSdpReady={handleLocalSdpReady}
           onIceCandidateReady={handleIceCandidateReady}
           onConnectionError={handleConnectionError}
+          onConnectionStateChange={handleConnectionStateChange}
         />
         <View style={styles.statusOverlay}>
           <Text style={[styles.statusText, { fontWeight: 'bold' }]}>
@@ -193,10 +218,16 @@ export default function App(): React.JSX.Element {
             <TouchableOpacity
               style={[
                 styles.button,
-                _isConnected ? styles.buttonDisabled : styles.buttonPrimary,
+                connectionStatus === 'connected' ||
+                connectionStatus === 'connecting'
+                  ? styles.buttonDisabled
+                  : styles.buttonPrimary,
               ]}
               onPress={handleConnect}
-              disabled={_isConnected}
+              disabled={
+                connectionStatus === 'connected' ||
+                connectionStatus === 'connecting'
+              }
             >
               <Text style={styles.buttonText}>Connect</Text>
             </TouchableOpacity>
@@ -204,10 +235,18 @@ export default function App(): React.JSX.Element {
             <TouchableOpacity
               style={[
                 styles.button,
-                !_isConnected ? styles.buttonDisabled : styles.buttonSecondary,
+                connectionStatus === 'disconnected' ||
+                connectionStatus === 'error' ||
+                connectionStatus === 'disconnecting'
+                  ? styles.buttonDisabled
+                  : styles.buttonSecondary,
               ]}
               onPress={handleDisconnect}
-              disabled={_isConnected}
+              disabled={
+                connectionStatus === 'disconnected' ||
+                connectionStatus === 'error' ||
+                connectionStatus === 'disconnecting'
+              }
             >
               <Text style={styles.buttonText}>Disconnect</Text>
             </TouchableOpacity>

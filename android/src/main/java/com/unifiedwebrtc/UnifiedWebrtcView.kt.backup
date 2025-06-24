@@ -62,7 +62,7 @@ class UnifiedWebrtcView(context: Context) : FrameLayout(context) {
         val initializationOptions = PeerConnectionFactory.InitializationOptions.builder(reactContext.applicationContext)
             .setFieldTrials(
                 "WebRTC-H264HighProfile/Enabled/" +
-                "WebRTC-H265Codec/Enabled/" +
+                "WebRTC-H265Codec/Disabled/" +
                 "WebRTC-DisableHardwareVideoDecoding/Disabled/" +
                 "WebRTC-SoftwareVideoDecoderFallback/Enabled/"
             )
@@ -124,16 +124,9 @@ class UnifiedWebrtcView(context: Context) : FrameLayout(context) {
                         val codecName = codec.name.uppercase()
                         val isH265 = codecName == "H265" || codecName == "HEVC"
                         if (isH265) {
-                            // Check device capabilities for H.265
-                            val enableH265 = android.os.Build.VERSION.SDK_INT >= 26 && 
-                                           !android.os.Build.MODEL.uppercase().contains("EMULATOR") && !android.os.Build.MODEL.uppercase().contains("SDK_GPHONE") &&
-                                           !android.os.Build.MODEL.uppercase().contains("GOLDFISH")
-                            
-                            Log.d(TAG, if (enableH265) "Including H.265/HEVC codec (device supports it)" else "Filtering out H.265/HEVC codec (device doesn't support it)")
-                            enableH265
-                        } else {
-                            true
+                            Log.d(TAG, "Filtering out H.265/HEVC codec to prevent crashes")
                         }
+                        !isH265
                     }.toTypedArray()
                     
                     Log.d(TAG, "Supported codecs: ${filteredCodecs.map { it.name }}")
@@ -1094,7 +1087,7 @@ a=fmtp:96 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
                 Log.d(TAG, "ICE gathering state: $newState")
                 when (newState) {
                     PeerConnection.IceGatheringState.GATHERING -> {
-                        // Start timeout timer for ICE gathering (max 3 seconds)
+                        // Start timeout timer for ICE gathering (max 10 seconds)
                         iceGatheringTimeoutHandler = Handler(Looper.getMainLooper())
                         iceGatheringTimeoutRunnable = Runnable {
                             if (!iceGatheringComplete && !whepOfferSent) {
@@ -1108,7 +1101,7 @@ a=fmtp:96 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
                                 }
                             }
                         }
-                        iceGatheringTimeoutHandler?.postDelayed(iceGatheringTimeoutRunnable!!, 3000) // 3 second timeout
+                        iceGatheringTimeoutHandler?.postDelayed(iceGatheringTimeoutRunnable!!, 10000) // 10 second timeout
                     }
                     PeerConnection.IceGatheringState.COMPLETE -> {
                         // Cancel timeout since gathering completed normally

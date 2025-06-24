@@ -5,6 +5,7 @@ import UnifiedWebrtcViewNativeComponent, {
   type OnLocalSdpEventData,
   type OnIceCandidateReadyEventData,
   type OnConnectionErrorEventData,
+  type OnConnectionStateChangeEventData,
 } from './UnifiedWebrtcViewNativeComponent';
 
 export interface UnifiedWebrtcViewProps extends ViewProps {
@@ -17,6 +18,9 @@ export interface UnifiedWebrtcViewProps extends ViewProps {
   }) => void;
   onConnectionError?: (event: {
     nativeEvent: { error: string; streamUrl: string };
+  }) => void;
+  onConnectionStateChange?: (event: {
+    nativeEvent: { state: string; streamUrl: string };
   }) => void;
 }
 
@@ -103,6 +107,12 @@ export const UnifiedWebrtcView = React.forwardRef<
     props.onConnectionError?.(event);
   };
 
+  const handleConnectionStateChange = (
+    event: NativeSyntheticEvent<OnConnectionStateChangeEventData>
+  ) => {
+    props.onConnectionStateChange?.(event);
+  };
+
   return (
     <UnifiedWebrtcViewNativeComponent
       color={props.color}
@@ -111,6 +121,7 @@ export const UnifiedWebrtcView = React.forwardRef<
       onLocalSdpReady={handleLocalSdpReady}
       onIceCandidateReady={handleIceCandidateReady}
       onConnectionError={handleConnectionError}
+      onConnectionStateChange={handleConnectionStateChange}
     />
   );
 });
