@@ -1656,7 +1656,7 @@ PODS:
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
   - SocketRocket (0.7.1)
-  - UnifiedWebrtc (0.1.0):
+  - UnifiedWebrtc (0.2.0):
     - GoogleWebRTC
     - RCT-Folly
     - React-Core
@@ -1958,12 +1958,12 @@ SPEC CHECKSUMS:
   React-timing: a90f4654cbda9c628614f9bee68967f1768bd6a5
   React-utils: a612d50555b6f0f90c74b7d79954019ad47f5de6
   ReactAppDependencyProvider: 04d5eb15eb46be6720e17a4a7fa92940a776e584
-  ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
+  ReactCodegen: 9d92db2696f6aeeed5cb51264883bb3365ecf694
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  UnifiedWebrtc: 9fa4e88f3f6d5261283c0a7c1b732cfa9558b229
+  UnifiedWebrtc: 10efbe66655560458bbc5c189571d02dacd56c25
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
 
 PODFILE CHECKSUM: 5847eb43e5859bcb45b63e3ac3188f0835b49ce3
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Method to initiate stream playback (will involve SDP exchange)
 - (void)playStream:(NSString *)streamUrlOrSignalingInfo; // Placeholder for actual signaling
+- (void)internalPlayStream:(NSString *)streamUrlOrSignalingInfo; // Internal implementation
 - (void)dispose;
 
 // Methods for SDP and ICE candidate handling (called from JS via commands)
@@ -27,6 +28,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)createAnswer; // If this view receives calls
 - (void)setRemoteDescriptionWithSdp:(NSString *)sdp type:(NSString *)type;
 - (void)addIceCandidateWithSdp:(NSString *)sdp sdpMLineIndex:(int)sdpMLineIndex sdpMid:(NSString *)sdpMid;
+
+// Conditional H.265 codec support methods
+- (RTCVideoDecoderFactory *)createVideoDecoderFactory;
+- (BOOL)shouldSupportH265;
+- (BOOL)isRunningOnSimulator;
+- (BOOL)hasHardwareH265Decoder;
+- (RTCVideoDecoderFactory *)createFilteredVideoDecoderFactory;
+
+// WHEP protocol support methods
+- (void)sendWhepOffer:(NSString *)whepUrl;
+- (void)emitConnectionStateChange:(NSString *)state;
+- (NSArray<RTCIceServer *> *)getIceServers;
 
 @end
 
