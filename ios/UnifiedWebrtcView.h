@@ -1,14 +1,6 @@
-#import <React/RCTViewComponentView.h>
+#import <React/RCTView.h>
 #import <UIKit/UIKit.h>
-#import <JitsiWebRTC/RTCPeerConnectionFactory.h>
-#import <JitsiWebRTC/RTCPeerConnection.h>
-#import <JitsiWebRTC/RTCVideoTrack.h>
-#import <JitsiWebRTC/RTCVideoView.h>
-#import <JitsiWebRTC/RTCSessionDescription.h>
-#import <JitsiWebRTC/RTCIceCandidate.h>
-#import <JitsiWebRTC/RTCMediaStream.h>
-#import <JitsiWebRTC/RTCVideoViewDelegate.h>
-#import <JitsiWebRTC/RTCPeerConnectionDelegate.h>
+#import <JitsiWebRTC/JitsiWebRTC.h>
 
 #ifndef UnifiedWebrtcViewNativeComponent_h
 #define UnifiedWebrtcViewNativeComponent_h
@@ -18,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Forward declare RTCMediaStream for the property
 @class RTCMediaStream;
 
-@interface UnifiedWebrtcView : RCTViewComponentView <RTCPeerConnectionDelegate, RTCVideoViewDelegate>
+@interface UnifiedWebrtcView : RCTView <RTCPeerConnectionDelegate, RTCVideoViewDelegate>
 
 @property (nonatomic, strong) RTCPeerConnectionFactory *peerConnectionFactory;
 @property (nonatomic, strong, nullable) RTCPeerConnection *peerConnection;

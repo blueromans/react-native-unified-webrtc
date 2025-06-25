@@ -44,13 +44,9 @@ Pod::Spec.new do |s|
     'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20', # Ensure consistency
     'CLANG_CXX_LIBRARY' => 'libc++',
-    # The following flag is important for the New Architecture (Fabric/TurboModules)
-    # It ensures that the codegen files are compiled correctly.
-    # From the build log, it seems like you are using the New Architecture.
-    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) RN_FABRIC_ENABLED=1',
+    'HEADER_SEARCH_PATHS' => '$(inherited) "$(PODS_ROOT)/RCT-Folly" "$(PODS_ROOT)/boost" "$(PODS_ROOT)/DoubleConversion"',
   }
 
-  # If using React Native's New Architecture (TurboModules/Fabric),
-  # you might need to set this flag. The build log suggests Codegen is in use.
-  s.compiler_flags = '-DRN_FABRIC_ENABLED=1'
+  # Compiler flags for old architecture
+  s.compiler_flags = '-DFOLLY_NO_CONFIG=1 -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1'
 end

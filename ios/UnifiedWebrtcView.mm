@@ -1,27 +1,10 @@
 #import "UnifiedWebrtcView.h"
 
-#import <react/renderer/components/UnifiedWebrtcViewSpec/ComponentDescriptors.h>
-#import <react/renderer/components/UnifiedWebrtcViewSpec/EventEmitters.h>
-#import <react/renderer/components/UnifiedWebrtcViewSpec/Props.h>
-#import <react/renderer/components/UnifiedWebrtcViewSpec/RCTComponentViewHelpers.h>
-
-#import "RCTFabricComponentsPlugins.h"
-
 // Import Jitsi WebRTC framework
-#import <JitsiWebRTC/RTCPeerConnectionFactory.h>
-#import <JitsiWebRTC/RTCDefaultVideoDecoderFactory.h>
-#import <JitsiWebRTC/RTCSoftwareVideoDecoderFactory.h>
-#import <JitsiWebRTC/RTCDefaultVideoEncoderFactory.h>
-#import <JitsiWebRTC/RTCConfiguration.h>
-#import <JitsiWebRTC/RTCIceServer.h>
-#import <JitsiWebRTC/RTCMediaConstraints.h>
-#import <JitsiWebRTC/RTCVideoRenderer.h>
-#import <JitsiWebRTC/RTCEAGLVideoView.h>
+#import <JitsiWebRTC/JitsiWebRTC.h>
 #import <AVFoundation/AVFoundation.h>
 
-using namespace facebook::react;
-
-@interface UnifiedWebrtcView () <RCTUnifiedWebrtcViewViewProtocol, RTCPeerConnectionDelegate, RTCVideoViewDelegate>
+@interface UnifiedWebrtcView () <RTCPeerConnectionDelegate, RTCVideoViewDelegate>
 
 @property (nonatomic, strong) NSTimer *iceGatheringTimer;
 @property (nonatomic, assign) BOOL iceGatheringComplete;
@@ -37,17 +20,9 @@ using namespace facebook::react;
     // No longer using _view from original template
 }
 
-+ (ComponentDescriptorProvider)componentDescriptorProvider
-{
-    return concreteComponentDescriptorProvider<UnifiedWebrtcViewComponentDescriptor>();
-}
-
 - (instancetype)initWithFrame:(CGRect)frame
 {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const UnifiedWebrtcViewProps>();
-    _props = defaultProps;
-
     NSLog(@"[UnifiedWebrtcView] Initializing WebRTC for iOS");
     
     // Initialize state variables
@@ -302,12 +277,9 @@ using namespace facebook::react;
     self.lastEmittedConnectionState = state;
     NSLog(@"[UnifiedWebrtcView] Connection state change event emitted: %@", state);
     
-    // Emit to React Native
-    if (self.eventEmitter) {
-        facebook::react::UnifiedWebrtcViewEventEmitter::OnConnectionStateChange event;
-        event.state = std::string([state UTF8String]);
-        std::static_pointer_cast<const facebook::react::UnifiedWebrtcViewEventEmitter>(self.eventEmitter)->onConnectionStateChange(event);
-    }
+    // For old architecture, we would need to use RCTEventDispatcher or onConnectionStateChange prop
+    // For now, just log the event - the React Native bridge will need to be set up separately
+    NSLog(@"[UnifiedWebrtcView] Would emit onConnectionStateChange event with state: %@", state);
 }
 
 - (void)createOffer {
