@@ -4,11 +4,28 @@ PODS:
   - fast_float (6.1.4)
   - FBLazyVector (0.79.2)
   - fmt (11.0.2)
+  - Giphy (2.2.4):
+    - libwebp
   - glog (0.3.5)
   - hermes-engine (0.79.2):
     - hermes-engine/Pre-built (= 0.79.2)
   - hermes-engine/Pre-built (0.79.2)
-  - JitsiWebRTC (124.0.2)
+  - JitsiMeetSDK (9.2.2):
+    - Giphy (= 2.2.4)
+    - JitsiWebRTC (~> 118.0)
+  - JitsiWebRTC (118.0.0)
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
+    - libwebp/webp
+  - libwebp/mux (1.5.0):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
+    - libwebp/sharpyuv
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -1657,11 +1674,30 @@ PODS:
     - React-utils (= 0.79.2)
   - SocketRocket (0.7.1)
   - UnifiedWebrtc (0.2.0):
-    - JitsiWebRTC (~> 124.0)
-    - RCT-Folly
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - JitsiMeetSDK (~> 9.2.2)
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
     - React-RCTFabric
-    - ReactCommon
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -1741,7 +1777,10 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Giphy
+    - JitsiMeetSDK
     - JitsiWebRTC
+    - libwebp
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1895,9 +1934,12 @@ SPEC CHECKSUMS:
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
+  Giphy: 6b5f6986c8df4f71e01a8ef86595f426b3439fb5
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 314be5250afa5692b57b4dd1705959e1973a8ebe
-  JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
+  JitsiMeetSDK: 20c6e5a09dafc3669d24cb7a1750cb0c51dc1180
+  JitsiWebRTC: 3a41671ef65a51d7204323814b055a2690b921c7
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 83ffb90c23ee5cea353bd32008a7bca100908f8c
   RCTRequired: eb7c0aba998009f47a540bec9e9d69a54f68136e
@@ -1961,9 +2003,9 @@ SPEC CHECKSUMS:
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  UnifiedWebrtc: 3c0289346b3a311474e408cc8166df1edd850411
+  UnifiedWebrtc: 88d5798a35172505e98fdf9ffb49af0d8a0a7d51
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
 
-PODFILE CHECKSUM: 5e56950c35317f49f830fc7d96fa779608ea8d3c
+PODFILE CHECKSUM: a35cfa63c525854844b3d75fd294c87481ed2a27
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

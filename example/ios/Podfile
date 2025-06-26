@@ -26,15 +26,24 @@ target 'UnifiedWebrtcExample' do
   )
 
   post_install do |installer|
-    # Disable precompiled headers for all pods to potentially resolve module issues
+    # Essential fixes for React Native build issues
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+        # Allow non-modular includes to fix React Native compilation
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        
+        # Disable precompiled headers that can cause issues
         config.build_settings['GCC_PRECOMPILE_PREFIX_HEADER'] = 'NO'
-        config.build_settings['GCC_PREFIX_HEADER'] = ''
+        
+        # Set C++ standard
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        
+        # Suppress warnings that are treated as errors
+        config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
       end
     end
-    # --- End of added code ---
-
+    
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,

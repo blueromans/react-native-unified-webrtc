@@ -17,36 +17,44 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { :ios => min_ios_version_supported }
-  s.source       = { :git => "https://github.com/blueromans/react-native-unified-webrtc.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/yasarozyurt/react-native-unified-webrtc.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm,cpp}"
-  # If you have headers that should not be public, list them here.
-  # For example, if some .h files are implementation details.
-  # s.private_header_files = "ios/Private/**/*.h" 
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
 
-  s.dependency "JitsiWebRTC", "~> 124.0" # Use Jitsi's WebRTC library to match Android
-  s.dependency "React-Core"
-  s.dependency "React-RCTFabric" # For Fabric components like RCTViewComponentView
-  s.dependency "ReactCommon" # Often needed with Fabric
-  s.dependency "RCT-Folly" # React Native's Folly
+  # React Native dependencies
+  if respond_to?(:install_modules_dependencies, true)
+    install_modules_dependencies(s)
+  else
+    s.dependency "React-Core"
+    s.dependency "React-RCTFabric"
+    s.dependency "ReactCommon"
+  end
+
+  # WebRTC dependency for streaming functionality
+  s.dependency "JitsiMeetSDK", "~> 9.2.2"
 
   s.static_framework = true 
 
-  s.frameworks = 'AVFoundation', 'AudioToolbox', 'CoreGraphics', 'CoreMedia', 'GLKit', 'VideoToolbox', 'MetalKit'
-  s.libraries = 'c', 'c++', 'sqlite3'
-
-  s.xcconfig = {
-    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20', # Matched to build logs
-    # 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) WEBRTC_IOS=1', # Example
+  # Compiler flags for C++ and Objective-C++
+  s.pod_target_xcconfig = {
+    "DEFINES_MODULE" => "YES",
+    "CLANG_CXX_LANGUAGE_STANDARD" => "c++17",
+    "HEADER_SEARCH_PATHS" => [
+      "\"$(PODS_ROOT)/Headers/Private/React-Core\"",
+      "\"$(PODS_ROOT)/Headers/Public/React-Core\"",
+      "\"$(PODS_ROOT)/Headers/Private/ReactCommon\"",
+      "\"$(PODS_ROOT)/Headers/Public/ReactCommon\"",
+      "\"$(PODS_ROOT)/Headers/Private/React-RCTFabric\"",
+      "\"$(PODS_ROOT)/Headers/Public/React-RCTFabric\"",
+      "\"$(PODS_ROOT)/Headers/Private/RCT-Folly\"",
+      "\"$(PODS_ROOT)/Headers/Public/RCT-Folly\""
+    ].join(" "),
+    "CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES" => "YES",
+    "CLANG_WARN_DOCUMENTATION_COMMENTS" => "NO",
+    "GCC_WARN_INHIBIT_ALL_WARNINGS" => "YES"
   }
   
-  s.pod_target_xcconfig = {
-    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
-    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20', # Ensure consistency
-    'CLANG_CXX_LIBRARY' => 'libc++',
-    'HEADER_SEARCH_PATHS' => '$(inherited) "$(PODS_ROOT)/RCT-Folly" "$(PODS_ROOT)/boost" "$(PODS_ROOT)/DoubleConversion"',
+  s.user_target_xcconfig = {
+    "CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES" => "YES"
   }
-
-  # Compiler flags for old architecture
-  s.compiler_flags = '-DFOLLY_NO_CONFIG=1 -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1'
 end
